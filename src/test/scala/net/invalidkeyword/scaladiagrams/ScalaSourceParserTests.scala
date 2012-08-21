@@ -34,5 +34,11 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
       result.successful should be(true)
       result.get should be(CLASS("bob",List(WITH("bill"))))
     }
+    
+    it("should parse a class with an extends and some withs") {
+      val result = ScalaSourceParser.run("class bob extends bill with peter with paul")
+      result.successful should be(true)
+      result.get should be(CLASS("bob",List(WITH("bill"),WITH("peter"),WITH("paul"))))
+    }
   }
 }

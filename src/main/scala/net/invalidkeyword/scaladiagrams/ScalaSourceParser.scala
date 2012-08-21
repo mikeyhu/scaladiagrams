@@ -13,8 +13,8 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val wordWith = "with"
   val wordExtends = "extends"
   
-  def classGroup = wordClass~wordExp~repsep(withGroup, " ") ^^ {case wordClass~name~withs => CLASS(name,withs)}
-  def traitGroup = wordTrait~wordExp ^^ {case wordTrait~name => TRAIT(name)} 
+  def classGroup = wordClass~wordExp~rep(withGroup) ^^ {case pre~name~withs => CLASS(name,withs)}
+  def traitGroup = wordTrait~wordExp ^^ {case pre~name => TRAIT(name)} 
   def withGroup = (wordExtends|wordWith)~wordExp ^^ {case pre~name => WITH(name)}
   
   def root = (classGroup|traitGroup)
