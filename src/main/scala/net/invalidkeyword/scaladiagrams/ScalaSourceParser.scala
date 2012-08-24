@@ -45,10 +45,37 @@ trait RunParser {
   def run(in: String): ParseResult[RootType] = parseAll(root, in)
 }
 
-case class CASE(name : String, withs : {}) extends EXP
-case class OBJECT(name : String, withs : {}) extends EXP
-case class CLASS(name : String, withs : {}) extends EXP
-case class TRAIT(name : String, withs : {}) extends EXP
-case class WITH(name : String) extends EXP
+case class CASE(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+  override val color = "burlywood"
+}
+case class OBJECT(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+  override val color = "gold"
+}
+case class CLASS(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+  override val color = "darkorange"
+}
+
+case class TRAIT(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+  override val color = "cadetblue"
+}
+
+case class WITH(override val name : String, self : Boolean = false) extends EXP
+
 case class IGNORED() extends EXP
-abstract class EXP
+
+abstract class WITHABLE(override val name : String, withs : List[WITH]) extends EXP {
+  
+  def node = name + " [style=filled, fillcolor=" + color + "]"
+  override def toString = node + "\n" + withs.map(a=> name + " -> " + a.name).mkString(";\n")
+  val color = "white"
+    
+  override lazy val hasChildren = withs.size > 0
+  def children = withs
+  
+  def isParentOf(name : String) = children.find(a => a.name==name).isDefined
+}
+
+abstract class EXP {
+  lazy val hasChildren = false
+  def name = ""
+}
