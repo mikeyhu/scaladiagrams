@@ -60,9 +60,9 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
     }
     
     it("should parse a class with a self: ") {
-      val result = ScalaSourceParser.run("class bob and some trait bill with peter { self:abc with xyz => ")
+      val result = ScalaSourceParser.run("class bob with peter { self: abc with xyz => ")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List()),TRAIT("bill",List(WITH("peter"),WITH("abc",self=true),WITH("xyz",self=true))) ))
+      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List(WITH("peter"),WITH("abc",self=true),WITH("xyz",self=true))) ))
     }
     
     it("should parse a case class with params") {
@@ -77,18 +77,19 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
     }
     
     it("should parse a source file") {
-      val input = scala.io.Source.fromFile("/home/casper/scaladiagrams/src/main/scala/net/invalidkeyword/scaladiagrams/ScalaSourceParser.scala").mkString
+      val input = scala.io.Source.fromFile("src/main/scala/net/invalidkeyword/scaladiagrams/ScalaSourceParser.scala").mkString
       val result = ScalaSourceParser.run(input)
       result.successful should be(true)
       ScalaSourceParser.filter(result.get) should be(List(
           OBJECT("ScalaSourceParser",List(WITH("RegexParsers"),WITH("RunParser"))),
           TRAIT("RunParser",List()),
-          CASE("CASE",List(WITH("EXP"))),
-          CASE("OBJECT",List(WITH("EXP"))),
-          CASE("CLASS",List(WITH("EXP"))),
-          CASE("TRAIT",List(WITH("EXP"))),
+          CASE("CASE",List(WITH("WITHABLE"))),
+          CASE("OBJECT",List(WITH("WITHABLE"))),
+          CASE("CLASS",List(WITH("WITHABLE"))),
+          CASE("TRAIT",List(WITH("WITHABLE"))),
           CASE("WITH",List(WITH("EXP"))),
           CASE("IGNORED",List(WITH("EXP"))),
+          CLASS("WITHABLE",List(WITH("EXP"))),
           CLASS("EXP",List())
       ))
     }

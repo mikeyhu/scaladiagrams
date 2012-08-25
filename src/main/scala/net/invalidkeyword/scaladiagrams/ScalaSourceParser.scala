@@ -21,12 +21,19 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val wordWith = "with "
   val wordExtends = "extends "
   
-  def classGroup : Parser[EXP] = wordClass~wordExp~opt(brackets)~rep(withGroup) ^^ {case pre~name~brackets~withs => CLASS(name,withs)}
-  def traitGroup : Parser[EXP]= wordTrait~wordExp~rep(withGroup) ^^ {case pre~name~withs => TRAIT(name,withs)} 
-  def objectGroup : Parser[EXP]= wordObject~wordExp~rep(withGroup) ^^ {case pre~name~withs => OBJECT(name,withs)} 
-  def caseGroup : Parser[EXP]= wordCase~wordExp~opt(brackets)~rep(withGroup) ^^ {case pre~name~brackets~withs => CASE(name,withs)} 
+  val selfStart = """\{\s*""".r
+  val selfEnd = "=>"
+  val wordSelf = "self:"
+  
+  def classGroup : Parser[EXP] = wordClass~wordExp~opt(brackets)~rep(withGroup)~opt(optionalSelf) ^^ {case pre~name~brackets~withs~self => CLASS(name,withs ++ self.getOrElse((List())))}
+  def traitGroup : Parser[EXP] = wordTrait~wordExp~rep(withGroup) ^^ {case pre~name~withs => TRAIT(name,withs)} 
+  def objectGroup : Parser[EXP] = wordObject~wordExp~rep(withGroup) ^^ {case pre~name~withs => OBJECT(name,withs)} 
+  def caseGroup : Parser[EXP] = wordCase~wordExp~opt(brackets)~rep(withGroup) ^^ {case pre~name~brackets~withs => CASE(name,withs)} 
   
   def withGroup = (wordExtends|wordWith)~wordExp ^^ {case pre~name => WITH(name)}
+  def selfGroup = (wordSelf|wordExtends|wordWith)~wordExp ^^ {case pre~name => WITH(name,true)}
+  
+  def optionalSelf = selfStart~>rep(selfGroup)<~selfEnd 
   
   def parsable : Parser[List[EXP]] = rep(caseGroup|classGroup|traitGroup|objectGroup|ignored)
   
