@@ -8,7 +8,7 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   
   
 
-  val ignored = regex("""\S""".r) ^^ {case ig => IGNORED()}
+  val ignored = regex("""\S""".r) ^^ {case ig => IGNORED}
   
   val wordExp= regex("""\w+""".r) ^^ {case word => word}
   
@@ -25,23 +25,23 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val selfEnd = "=>"
   val wordSelf = "self:"
   
-  def classGroup : Parser[EXP] = wordClass~wordExp~opt(brackets)~rep(withGroup)~opt(optionalSelf) ^^ {case pre~name~brackets~withs~self => CLASS(name,withs ++ self.getOrElse((List())))}
-  def traitGroup : Parser[EXP] = wordTrait~wordExp~rep(withGroup) ^^ {case pre~name~withs => TRAIT(name,withs)} 
-  def objectGroup : Parser[EXP] = wordObject~wordExp~rep(withGroup) ^^ {case pre~name~withs => OBJECT(name,withs)} 
-  def caseGroup : Parser[EXP] = wordCase~wordExp~opt(brackets)~rep(withGroup) ^^ {case pre~name~brackets~withs => CASE(name,withs)} 
+  def classGroup : Parser[KEYWORD] = wordClass~wordExp~opt(brackets)~rep(withGroup)~opt(optionalSelf) ^^ {case pre~name~brackets~withs~self => CLASS(name,withs ++ self.getOrElse((List())))}
+  def traitGroup : Parser[KEYWORD] = wordTrait~wordExp~rep(withGroup) ^^ {case pre~name~withs => TRAIT(name,withs)} 
+  def objectGroup : Parser[KEYWORD] = wordObject~wordExp~rep(withGroup) ^^ {case pre~name~withs => OBJECT(name,withs)} 
+  def caseGroup : Parser[KEYWORD] = wordCase~wordExp~opt(brackets)~rep(withGroup) ^^ {case pre~name~brackets~withs => CASE(name,withs)} 
   
-  def withGroup = (wordExtends|wordWith)~wordExp ^^ {case pre~name => WITH(name)}
-  def selfGroup = (wordSelf|wordExtends|wordWith)~wordExp ^^ {case pre~name => WITH(name,true)}
+  def withGroup = (wordExtends|wordWith)~wordExp ^^ {case pre~name => RELATED(name)}
+  def selfGroup = (wordSelf|wordExtends|wordWith)~wordExp ^^ {case pre~name => RELATED(name,true)}
   
   def optionalSelf = selfStart~>rep(selfGroup)<~selfEnd 
   
-  def parsable : Parser[List[EXP]] = rep(caseGroup|classGroup|traitGroup|objectGroup|ignored)
+  def parsable : Parser[List[KEYWORD]] = rep(caseGroup|classGroup|traitGroup|objectGroup|ignored)
   
   def root = parsable 
   
-  type RootType = List[EXP]
+  type RootType = List[KEYWORD]
   
-  def filter(matches : List[EXP]) = matches.filter(r => r!=IGNORED())
+  def filter(matches : List[KEYWORD]) = matches.filter(r => r!=IGNORED)
   
 }
 
@@ -52,25 +52,25 @@ trait RunParser {
   def run(in: String): ParseResult[RootType] = parseAll(root, in)
 }
 
-case class CASE(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+case class CASE(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
   override val color = "burlywood"
 }
-case class OBJECT(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+case class OBJECT(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
   override val color = "gold"
 }
-case class CLASS(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+case class CLASS(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
   override val color = "darkorange"
 }
 
-case class TRAIT(override val name : String, withs : List[WITH]) extends WITHABLE(name,withs) {
+case class TRAIT(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
   override val color = "cadetblue"
 }
 
-case class WITH(override val name : String, self : Boolean = false) extends EXP
+case class RELATED(override val name : String, self : Boolean = false) extends KEYWORD
 
-case class IGNORED() extends EXP
+object IGNORED extends KEYWORD
 
-abstract class WITHABLE(override val name : String, withs : List[WITH]) extends EXP {
+abstract class TYPE(override val name : String, withs : List[RELATED]) extends KEYWORD {
   
   def node = name + " [style=filled, fillcolor=" + color + "]"
   override def toString = node + "\n" + withs.map(a=> name + " -> " + a.name).mkString(";\n")
@@ -82,7 +82,7 @@ abstract class WITHABLE(override val name : String, withs : List[WITH]) extends 
   def isParentOf(name : String) = children.find(a => a.name==name).isDefined
 }
 
-abstract class EXP {
+abstract class KEYWORD {
   lazy val hasChildren = false
   def name = ""
 }

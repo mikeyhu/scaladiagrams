@@ -26,19 +26,19 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
     it("should parse a class with an with") {
       val result = ScalaSourceParser.run("class bob with bill")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(WITH("bill")))))
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(RELATED("bill")))))
     }
         
     it("should parse a class with an extends") {
       val result = ScalaSourceParser.run("class bob extends bill")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(WITH("bill")))))
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(RELATED("bill")))))
     }
     
     it("should parse a class with an extends and some withs") {
       val result = ScalaSourceParser.run("class bob extends bill with peter with paul")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(WITH("bill"),WITH("peter"),WITH("paul")))))
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(RELATED("bill"),RELATED("peter"),RELATED("paul")))))
     }
     
     it("should parse a class after some other text") {
@@ -56,19 +56,19 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
     it("should parse a class with some other text") {
       val result = ScalaSourceParser.run("abc some class bob and some trait bill with peter more stuff")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List()),TRAIT("bill",List(WITH("peter"))) ))
+      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List()),TRAIT("bill",List(RELATED("peter"))) ))
     }
     
     it("should parse a class with a self: ") {
       val result = ScalaSourceParser.run("class bob with peter { self: abc with xyz => ")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List(WITH("peter"),WITH("abc",self=true),WITH("xyz",self=true))) ))
+      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List(RELATED("peter"),RELATED("abc",self=true),RELATED("xyz",self=true))) ))
     }
     
     it("should parse a case class with params") {
       val result = ScalaSourceParser.run("case class bob (abc : String) extends bill")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List(CASE("bob",List(WITH("bill")))))
+      ScalaSourceParser.filter(result.get) should be(List(CASE("bob",List(RELATED("bill")))))
     }
     
     it("a class should have a color") {
@@ -81,16 +81,16 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
       val result = ScalaSourceParser.run(input)
       result.successful should be(true)
       ScalaSourceParser.filter(result.get) should be(List(
-          OBJECT("ScalaSourceParser",List(WITH("RegexParsers"),WITH("RunParser"))),
+          OBJECT("ScalaSourceParser",List(RELATED("RegexParsers"),RELATED("RunParser"))),
           TRAIT("RunParser",List()),
-          CASE("CASE",List(WITH("WITHABLE"))),
-          CASE("OBJECT",List(WITH("WITHABLE"))),
-          CASE("CLASS",List(WITH("WITHABLE"))),
-          CASE("TRAIT",List(WITH("WITHABLE"))),
-          CASE("WITH",List(WITH("EXP"))),
-          CASE("IGNORED",List(WITH("EXP"))),
-          CLASS("WITHABLE",List(WITH("EXP"))),
-          CLASS("EXP",List())
+          CASE("CASE",List(RELATED("TYPE"))),
+          CASE("OBJECT",List(RELATED("TYPE"))),
+          CASE("CLASS",List(RELATED("TYPE"))),
+          CASE("TRAIT",List(RELATED("TYPE"))),
+          CASE("RELATED",List(RELATED("KEYWORD"))),
+          OBJECT("IGNORED",List(RELATED("KEYWORD"))),
+          CLASS("TYPE",List(RELATED("KEYWORD"))),
+          CLASS("KEYWORD",List())
       ))
     }
     
