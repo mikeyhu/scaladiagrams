@@ -62,7 +62,7 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
     it("should parse a class with a self: ") {
       val result = ScalaSourceParser.run("class bob with peter { self: abc with xyz => ")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List(RELATED("peter"),RELATED("abc",self=true),RELATED("xyz",self=true))) ))
+      ScalaSourceParser.filter(result.get) should be(List( CLASS("bob",List(RELATED("peter",self=false),RELATED("abc",self=true),RELATED("xyz",self=true))) ))
     }
     
     it("should parse a case class with params") {
