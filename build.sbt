@@ -8,8 +8,11 @@ scalaVersion := "2.9.1"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
+seq(assemblySettings: _*)
+
 libraryDependencies ++= Seq(
-  "org.scalatest" % "scalatest_2.9.0" % "1.6.1" % "test"
+  "org.scalatest" % "scalatest_2.9.0" % "1.6.1" % "test",
+  "org.rogach" %% "scallop" % "0.6.0"
 )
 
 resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
