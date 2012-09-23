@@ -11,5 +11,5 @@ class InputFinder {
 	      case files => files.toStream.flatMap(tree(_, skipHidden))
 	  })
 	  
-	def files(dir : String) = tree(new File(dir)).filter(f => f.isFile && f.getName.endsWith(".scala")).toArray
+	def files(dir : String, extension : String) = tree(new File(dir)).filter(f => f.isFile && f.getName.endsWith(extension)).toArray
 }
