@@ -1,7 +1,7 @@
 Scala Diagrams
 ==============
 Scaladiagrams is a command line tool to generate DOT files representing a Scala projects class hierarchy. These DOT files can then be passed to a renderer
-such as [GraphViz](http://www.graphviz.org/) to visual the hierarchy.
+such as [GraphViz](http://www.graphviz.org/) to draw the hierarchy.
 
 Usage
 -----
@@ -13,7 +13,7 @@ To run Scaladiagrams do the following:
 
 If you have Graphviz installed, you can generate an image like so:
 
-	scaladiagrams --source pathToScalaSourcefiles | dot -Tpng > dotFile
+	scaladiagrams --source pathToScalaSourcefiles | dot -Tpng > file.png
 
 Large class hierarchies are probably best rendered as an SVG file, just replace the -t target to svg.
 
