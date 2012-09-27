@@ -1,1 +1,1 @@
-java -Xmx1024M -jar ops/sbt-launch.jar "$@"
+java -Xmx1024M -jar `dirname $0`/ops/sbt-launch.jar "$@"
