@@ -6,8 +6,6 @@ object ScalaSourceParser extends RegexParsers with RunParser {
 
   override def skipWhitespace = true
   
-  
-
   val ignored = regex("""\S""".r) ^^ {case ig => IGNORED}
   
   val wordExp= regex("""\w+""".r) ^^ {case word => word}
@@ -41,7 +39,7 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   
   type RootType = List[KEYWORD]
   
-  def filter(matches : List[KEYWORD]) = matches.filter(r => r!=IGNORED)
+  def filter(matches : List[KEYWORD]) : List[TYPE] = matches.filter(r => r!=IGNORED).asInstanceOf[List[TYPE]]
   
 }
 
@@ -73,7 +71,7 @@ object IGNORED extends KEYWORD
 abstract class TYPE(override val name : String, withs : List[RELATED]) extends KEYWORD {
   
   def node = name + " [style=filled, fillcolor=" + color + "]"
-  override def toString = node + "\n" + withs.map(a=> name + " -> " + a.name).mkString(";\n")
+  override def toString = node + {if(withs.size>0) withs.map(a=> "  " + name + " -> " + a.name).mkString("\n",";\n",";") else ""} + "\n"
   val color = "white"
     
   override lazy val hasChildren = withs.size > 0
