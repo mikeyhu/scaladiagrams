@@ -28,7 +28,7 @@ class NodeSelectorTests extends Spec with ShouldMatchers  {
         val nodes = List(CLASS("myClass",List(RELATED("anotherClass"))), CLASS("anotherClass",List(RELATED("third"))), CLASS("unused",List()), CLASS("third",List()))
     	val ns = new NodeSelector(nodes)
         val node = ns.findNode("myClass").get
-        ns.selectNodes(node) should be(Set(CLASS("third",List()),CLASS("myClass",List(RELATED("anotherClass"))),CLASS("anotherClass",List(RELATED("third")))))
+        ns.selectChildNodes(node) should be(Set(CLASS("third",List()),CLASS("myClass",List(RELATED("anotherClass"))),CLASS("anotherClass",List(RELATED("third")))))
         
     }
   }
