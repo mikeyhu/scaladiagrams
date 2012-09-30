@@ -64,14 +64,16 @@ case class TRAIT(override val name : String, withs : List[RELATED]) extends TYPE
   override val color = "cadetblue"
 }
 
-case class RELATED(override val name : String, self : Boolean = false) extends KEYWORD
+case class RELATED(override val name : String, self : Boolean = false) extends KEYWORD {
+  def relationType = if(self) " [style=dashed];" else ";"
+}
 
 object IGNORED extends KEYWORD
 
 abstract class TYPE(override val name : String, withs : List[RELATED]) extends KEYWORD {
   
   def node = name + " [style=filled, fillcolor=" + color + "]"
-  override def toString = node + {if(withs.size>0) withs.map(a=> "  " + name + " -> " + a.name).mkString("\n",";\n",";") else ""} + "\n"
+  override def toString = node + withs.map(a=> name + " -> " + a.name + a.relationType).mkString("\n  ","\n  ","\n")
   val color = "white"
     
   override lazy val hasChildren = withs.size > 0

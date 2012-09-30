@@ -76,6 +76,7 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
       cl.color should be("darkorange")
     }
     
+    //This test is based on the source code of ScalaSourceParser.scala so is likely to break when that file is changed...
     it("should parse a source file") {
       val input = scala.io.Source.fromFile("src/main/scala/net/invalidkeyword/scaladiagrams/ScalaSourceParser.scala").mkString
       val result = ScalaSourceParser.run(input)
@@ -92,6 +93,16 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
           CLASS("TYPE",List(RELATED("KEYWORD"))),
           CLASS("KEYWORD",List())
       ))
+    }
+    
+    it("should output an type in DOT format") {
+      val cl = CLASS("abc",List(RELATED("def")))
+      cl.toString() should be("abc [style=filled, fillcolor=darkorange]\n  abc -> def;\n")
+    }
+    
+    it("should output a type in DOT format with a dashed line for self-types") {
+      val cl = CLASS("abc",List(RELATED("def",true)))
+      cl.toString() should be("abc [style=filled, fillcolor=darkorange]\n  abc -> def [style=dashed];\n")
     }
     
   }
