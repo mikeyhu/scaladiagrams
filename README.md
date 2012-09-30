@@ -23,9 +23,11 @@ Other options
 	./scaladiagrams --help
 		-e, --extension  <arg>    (default = .scala) 
 		-l, --linked             only output types that extend other types 
-		-s, --source  <arg>      location of source files (default = .)
+		-p, --parent  <arg>      only output parents of the named class 
+		-s, --source  <arg>      location of source files (default = .) 
 
-Most useful of these is -l, to remove types that do not inherit anything and are not inherited.
+
+Most useful of these are --linked and --parent; these both reduce the scope of the diagram to be produced.
 
 Example diagram
 ---------------
