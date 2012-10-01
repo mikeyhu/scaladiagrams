@@ -23,16 +23,17 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val selfEnd = "=>"
   val wordSelf = "self:"
   
-  def classGroup : Parser[KEYWORD] = wordClass~wordExp~opt(brackets)~rep(withGroup)~opt(optionalSelf) ^^ {case pre~name~brackets~withs~self => CLASS(name,withs ++ self.getOrElse((List())))}
-  def traitGroup : Parser[KEYWORD] = wordTrait~wordExp~rep(withGroup) ^^ {case pre~name~withs => TRAIT(name,withs)} 
-  def objectGroup : Parser[KEYWORD] = wordObject~wordExp~rep(withGroup) ^^ {case pre~name~withs => OBJECT(name,withs)} 
-  def caseGroup : Parser[KEYWORD] = wordCase~wordExp~opt(brackets)~rep(withGroup) ^^ {case pre~name~brackets~withs => CASE(name,withs)} 
+  def classGroup : Parser[KEYWORD] = wordClass~wordExp~opt(brackets)~related ^^ {case pre~name~brackets~related => CLASS(name,related)}
+  def traitGroup : Parser[KEYWORD] = wordTrait~wordExp~related ^^ {case pre~name~related => TRAIT(name,related)} 
+  def objectGroup : Parser[KEYWORD] = wordObject~wordExp~related ^^ {case pre~name~related => OBJECT(name,related)} 
+  def caseGroup : Parser[KEYWORD] = wordCase~wordExp~opt(brackets)~related ^^ {case pre~name~brackets~related => CASE(name,related)} 
   
   def withGroup = (wordExtends|wordWith)~wordExp ^^ {case pre~name => RELATED(name)}
   def selfGroup = (wordSelf|wordExtends|wordWith)~wordExp ^^ {case pre~name => RELATED(name,true)}
+  def optionalSelf = selfStart~>rep(selfGroup)<~selfEnd
   
-  def optionalSelf = selfStart~>rep(selfGroup)<~selfEnd 
-  
+  def related = rep(withGroup)~opt(optionalSelf) ^^ {case withs~self => withs ++ self.getOrElse((List()))}
+    
   def parsable : Parser[List[KEYWORD]] = rep(caseGroup|classGroup|traitGroup|objectGroup|ignored)
   
   def root = parsable 
