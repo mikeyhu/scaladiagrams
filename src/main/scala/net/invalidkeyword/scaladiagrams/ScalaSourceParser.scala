@@ -10,8 +10,11 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   
   val wordExp= regex("""\w+""".r) ^^ {case word => word}
   
+  val packageExp = regex("""[\w.]+""".r)
+  
   val brackets = regex("""\([^\)]*\)""".r)
   
+  val wordPackage = "package "
   val wordClass = "class "
   val wordCase = "case class "
   val wordTrait = "trait "
@@ -23,6 +26,8 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val selfEnd = "=>"
   val wordSelf = "self:"
   
+  def packageGroup = wordPackage~packageExp ^^ {case pre~name => name}
+    
   def classGroup : Parser[KEYWORD] = wordClass~wordExp~opt(brackets)~related ^^ {case pre~name~brackets~related => CLASS(name,related)}
   def traitGroup : Parser[KEYWORD] = wordTrait~wordExp~related ^^ {case pre~name~related => TRAIT(name,related)} 
   def objectGroup : Parser[KEYWORD] = wordObject~wordExp~related ^^ {case pre~name~related => OBJECT(name,related)} 
@@ -34,8 +39,16 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   
   def related = rep(withGroup)~opt(optionalSelf) ^^ {case withs~self => withs ++ self.getOrElse((List()))}
     
-  def parsable : Parser[List[KEYWORD]] = rep(caseGroup|classGroup|traitGroup|objectGroup|ignored)
-  
+  def parsable : Parser[List[KEYWORD]] = opt(packageGroup)~rep(caseGroup|classGroup|traitGroup|objectGroup|ignored) ^^ {
+    case pack~groups => 
+      groups.filter(i=>i != IGNORED).map{
+        case CLASS(n,r,_) => CLASS(n,r,pack.getOrElse(""))
+        case TRAIT(n,r,_) => TRAIT(n,r,pack.getOrElse(""))
+        case OBJECT(n,r,_) => OBJECT(n,r,pack.getOrElse(""))
+        case CASE(n,r,_) => CASE(n,r,pack.getOrElse(""))
+      }
+  }
+ 
   def root = parsable 
   
   type RootType = List[KEYWORD]
@@ -51,17 +64,17 @@ trait RunParser {
   def run(in: String): ParseResult[RootType] = parseAll(root, in)
 }
 
-case class CASE(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
+case class CASE(override val name : String, withs : List[RELATED], pack : String="") extends TYPE(name,withs,pack) {
   override val color = "burlywood"
 }
-case class OBJECT(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
+case class OBJECT(override val name : String, withs : List[RELATED], pack : String="") extends TYPE(name,withs,pack) {
   override val color = "gold"
 }
-case class CLASS(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
+case class CLASS(override val name : String, withs : List[RELATED], pack : String="") extends TYPE(name,withs,pack) {
   override val color = "darkorange"
 }
 
-case class TRAIT(override val name : String, withs : List[RELATED]) extends TYPE(name,withs) {
+case class TRAIT(override val name : String, withs : List[RELATED], pack : String="") extends TYPE(name,withs,pack) {
   override val color = "cadetblue"
 }
 
@@ -71,7 +84,7 @@ case class RELATED(override val name : String, self : Boolean = false) extends K
 
 object IGNORED extends KEYWORD
 
-abstract class TYPE(override val name : String, withs : List[RELATED]) extends KEYWORD {
+abstract class TYPE(override val name : String, withs : List[RELATED], pack : String ="") extends KEYWORD {
   
   def node = name + " [style=filled, fillcolor=" + color + "]"
   override def toString = node + withs.map(a=> name + " -> " + a.name + a.relationType).mkString("\n  ","\n  ","\n")

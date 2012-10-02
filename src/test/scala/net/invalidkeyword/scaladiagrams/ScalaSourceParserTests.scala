@@ -77,6 +77,12 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
       ScalaSourceParser.filter(result.get) should be(List(CASE("bob",List(RELATED("bill")))))
     }
     
+    it("should parse a package with a class") {
+      val result = ScalaSourceParser.run("package bill.peter\n class bob (abc : String) extends bill")
+      result.successful should be(true)
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(RELATED("bill")),"bill.peter")))
+    }
+    
     it("a class should have a color") {
       val cl = CLASS("abc",List())
       cl.color should be("darkorange")
@@ -87,18 +93,9 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
       val input = scala.io.Source.fromFile("src/main/scala/net/invalidkeyword/scaladiagrams/ScalaSourceParser.scala").mkString
       val result = ScalaSourceParser.run(input)
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List(
-          OBJECT("ScalaSourceParser",List(RELATED("RegexParsers"),RELATED("RunParser"))),
-          TRAIT("RunParser",List()),
-          CASE("CASE",List(RELATED("TYPE"))),
-          CASE("OBJECT",List(RELATED("TYPE"))),
-          CASE("CLASS",List(RELATED("TYPE"))),
-          CASE("TRAIT",List(RELATED("TYPE"))),
-          CASE("RELATED",List(RELATED("KEYWORD"))),
-          OBJECT("IGNORED",List(RELATED("KEYWORD"))),
-          CLASS("TYPE",List(RELATED("KEYWORD"))),
-          CLASS("KEYWORD",List())
-      ))
+      ScalaSourceParser.filter(result.get).head should be(
+          OBJECT("ScalaSourceParser",List(RELATED("RegexParsers"),RELATED("RunParser")),"net.invalidkeyword.scaladiagrams")
+      )
     }
     
     it("should output an type in DOT format") {
