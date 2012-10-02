@@ -53,7 +53,7 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   
   type RootType = List[KEYWORD]
   
-  def filter(matches : List[KEYWORD]) : List[TYPE] = matches.filter(r => r!=IGNORED).asInstanceOf[List[TYPE]]
+  def filter(matches : List[KEYWORD]) : List[TYPE] = matches.asInstanceOf[List[TYPE]]
   
 }
 
