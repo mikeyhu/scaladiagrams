@@ -6,13 +6,13 @@ object ScalaSourceParser extends RegexParsers with RunParser {
 
   override def skipWhitespace = true
   
-  val ignored = regex("""\S""".r) ^^ {case ig => IGNORED}
+  val ignored = """\S""".r ^^ {case ig => IGNORED}
   
-  val wordExp= regex("""\w+""".r) ^^ {case word => word}
+  val wordExp= """\w+""".r ^^ {case word => word}
   
-  val packageExp = regex("""[\w.]+""".r)
+  val packageExp = """[\w.]+""".r
   
-  val brackets = regex("""\([^\)]*\)""".r)
+  val brackets = """\([^\)]*\)""".r
   
   val wordPackage = "package "
   val wordClass = "class "
