@@ -86,8 +86,8 @@ object IGNORED extends KEYWORD
 
 abstract class TYPE(override val name : String, withs : List[RELATED], pack : String ="") extends KEYWORD {
   
-  def node = name + " [style=filled, fillcolor=" + color + "]"
-  override def toString = node + withs.map(a=> name + " -> " + a.name + a.relationType).mkString("\n  ","\n  ","\n")
+  def node = quoted(name) + " [style=filled, fillcolor=" + color + "]"
+  override def toString = node + withs.map(a=> quoted(name) + " -> " + quoted(a.name) + a.relationType).mkString("\n  ","\n  ","\n")
   val color = "white"
     
   override lazy val hasChildren = withs.size > 0
@@ -99,4 +99,6 @@ abstract class TYPE(override val name : String, withs : List[RELATED], pack : St
 abstract class KEYWORD {
   lazy val hasChildren = false
   def name = ""
+
+  def quoted(string : String) = "\"" + string + "\""
 }

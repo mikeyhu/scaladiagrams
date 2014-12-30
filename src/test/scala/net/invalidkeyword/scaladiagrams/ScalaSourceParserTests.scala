@@ -100,12 +100,12 @@ class ScalaSourceParserTests extends Spec with ShouldMatchers  {
     
     it("should output an type in DOT format") {
       val cl = CLASS("abc",List(RELATED("def")))
-      cl.toString() should be("abc [style=filled, fillcolor=darkorange]\n  abc -> def;\n")
+      cl.toString() should be("\"abc\" [style=filled, fillcolor=darkorange]\n  \"abc\" -> \"def\";\n")
     }
     
     it("should output a type in DOT format with a dashed line for self-types") {
       val cl = CLASS("abc",List(RELATED("def",true)))
-      cl.toString() should be("abc [style=filled, fillcolor=darkorange]\n  abc -> def [style=dashed];\n")
+      cl.toString() should be("\"abc\" [style=filled, fillcolor=darkorange]\n  \"abc\" -> \"def\" [style=dashed];\n")
     }
     
   }
