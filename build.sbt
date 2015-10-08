@@ -4,16 +4,19 @@ name := "scaladiagrams"
 
 version := "1.0"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-seq(assemblySettings: _*)
-
 libraryDependencies ++= Seq(
-  "org.scalatest" % "scalatest_2.9.0" % "1.6.1" % "test",
-  "org.rogach" %% "scallop" % "0.6.0"
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.2",
+  "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
+  "org.rogach" %% "scallop" % "0.9.5"
 )
+
+test in assembly := {}
+
+jarName in assembly := "scaladiagrams-assembly-1.0.jar"
 
 resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
