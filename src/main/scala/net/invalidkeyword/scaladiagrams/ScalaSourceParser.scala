@@ -11,9 +11,11 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val wordExp= """\w+""".r ^^ {case word => word}
   
   val packageExp = """[\w.]+""".r
-  
+
+  val bracketOpen = "("
   val brackets = """\([^\)]*\)""".r
-  
+  val bracketClose = ")"
+
   val wordPackage = "package "
   val wordClass = "class "
   val wordCase = "case class "
@@ -25,19 +27,26 @@ object ScalaSourceParser extends RegexParsers with RunParser {
   val selfStart = """\{\s*""".r
   val selfEnd = "=>"
   val wordSelf = "self:"
-  
+
+  val beforeArgumentType = """[\w\s]+:\s*""".r
+  val afterArgumentType = """\s*=.+?(?=[\),])""".r
+  val typeName = """[\w\[\]]+""".r ^^ {case word => word}
+  val argumentSeparator = ","
+
   def packageGroup = wordPackage~packageExp ^^ {case pre~name => name}
     
-  def classGroup : Parser[KEYWORD] = wordClass~wordExp~opt(brackets)~related ^^ {case pre~name~brackets~related => CLASS(name,related)}
+  def classGroup : Parser[KEYWORD] = wordClass~wordExp~related ^^ {case pre~name~related => CLASS(name,related)}
   def traitGroup : Parser[KEYWORD] = wordTrait~wordExp~related ^^ {case pre~name~related => TRAIT(name,related)} 
   def objectGroup : Parser[KEYWORD] = wordObject~wordExp~related ^^ {case pre~name~related => OBJECT(name,related)} 
-  def caseGroup : Parser[KEYWORD] = wordCase~wordExp~opt(brackets)~related ^^ {case pre~name~brackets~related => CASE(name,related)} 
+  def caseGroup : Parser[KEYWORD] = wordCase~wordExp~opt(brackets)~related ^^ {case pre~name~brackets~related => CASE(name,related)}
   
   def withGroup = (wordExtends|wordWith)~wordExp ^^ {case pre~name => RELATED(name)}
   def selfGroup = (wordSelf|wordExtends|wordWith)~wordExp ^^ {case pre~name => RELATED(name,true)}
   def optionalSelf = selfStart~>rep(selfGroup)<~selfEnd
-  
-  def related = rep(withGroup)~opt(optionalSelf) ^^ {case withs~self => withs ++ self.getOrElse((List()))}
+  def argumentTypeGroup = beforeArgumentType ~> typeName <~ opt(afterArgumentType) <~ opt(argumentSeparator) ^^ {case name => RELATED(name)}
+  def argumentListTypes = bracketOpen ~> rep(argumentTypeGroup) <~ bracketClose
+
+  def related = opt(argumentListTypes)~rep(withGroup)~opt(optionalSelf) ^^ {case types~withs~self => types.getOrElse(Nil) ++ withs ++ self.getOrElse(Nil)}
     
   def parsable : Parser[List[KEYWORD]] = opt(packageGroup)~rep(caseGroup|classGroup|traitGroup|objectGroup|ignored) ^^ {
     case pack~groups => 
@@ -90,10 +99,10 @@ abstract class TYPE(override val name : String, withs : List[RELATED], pack : St
   override def toString = node + withs.map(a=> quoted(name) + " -> " + quoted(a.name) + a.relationType).mkString("\n  ","\n  ","\n")
   val color = "white"
     
-  override lazy val hasChildren = withs.size > 0
+  override lazy val hasChildren = withs.nonEmpty
   def children = withs
   
-  def isParentOf(name : String) = children.find(a => a.name==name).isDefined
+  def isParentOf(name : String) = children.exists(a => a.name == name)
 }
 
 abstract class KEYWORD {
