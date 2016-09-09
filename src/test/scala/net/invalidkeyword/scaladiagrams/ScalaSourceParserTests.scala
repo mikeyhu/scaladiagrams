@@ -19,7 +19,33 @@ class ScalaSourceParserTests extends FlatSpec with Matchers {
     it should " fail to parse some other text" in {
       val result = ScalaSourceParser.run("bob is a cat")
       ScalaSourceParser.filter(result.get) should be(List())
-    }   
+    }
+
+    it should " parse a class arguments with default values" in {
+      val result = ScalaSourceParser.run("class Bob (a : String = \"string\")")
+      result.successful should be(true)
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("Bob",List(RELATED("String")))))
+    }
+
+    it should " parse a class with type parameter" in {
+      val result = ScalaSourceParser.run("class Bob(val bill: Option[Bill] = None, will: Will)")
+      result.successful should be(true)
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("Bob",List(RELATED("Option[Bill]"),RELATED("Will")))))
+    }
+
+    it should " parse a class with newline in argument list" in {
+      val result = ScalaSourceParser.run(
+        """class Bob(a: Bill,
+          |val b: Will)""".stripMargin)
+      result.successful should be(true)
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("Bob",List(RELATED("Bill"),RELATED("Will")))))
+    }
+
+    it should " parse a class with arguments and extends" in {
+      val result = ScalaSourceParser.run("class Bob(a: Bill, b: Will) extends DuckBill")
+      result.successful should be(true)
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("Bob",List(RELATED("Bill"),RELATED("Will"),RELATED("DuckBill")))))
+    }
     
     it should " parse a class with an with" in {
       val result = ScalaSourceParser.run("class bob with bill")
@@ -76,9 +102,9 @@ class ScalaSourceParserTests extends FlatSpec with Matchers {
     }
     
     it should " parse a package with a class" in {
-      val result = ScalaSourceParser.run("package bill.peter\n class bob (abc : String) extends bill")
+      val result = ScalaSourceParser.run("package bill.peter\n class bob (abc: String) extends bill")
       result.successful should be(true)
-      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(RELATED("bill")),"bill.peter")))
+      ScalaSourceParser.filter(result.get) should be(List(CLASS("bob",List(RELATED("String"),RELATED("bill")),"bill.peter")))
     }
     
     it should " a class should have a color" in {
