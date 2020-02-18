@@ -1,1 +1,1 @@
-/`dirname $0`/sbt assemblysbj
+/`dirname $0`/sbt assembly
