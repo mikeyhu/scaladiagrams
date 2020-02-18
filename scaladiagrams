@@ -1,2 +1,2 @@
 #!/bin/sh
-java -jar `dirname $0`/target/scala-2.11/scaladiagrams-assembly-1.0.jar "$@"
+java -jar `dirname $0`/target/scala-2.13/scaladiagrams-assembly-1.0.jar "$@"
