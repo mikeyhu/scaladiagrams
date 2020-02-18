@@ -17,6 +17,7 @@ object DiagramCreator {
       val source = opt[String]("source", default=Some("."), descr = "location of source files")
       val linked = opt[Boolean]("linked", descr = "only output types that extend other types")
       val parent = opt[String]("parent", descr = "only output parents of a particular class")
+      verify()
     }
     
     val files = new InputFinder().files(Config.source(),Config.extension())
