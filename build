@@ -1,1 +1,3 @@
-`dirname $0`/sbt assembly
+#!/bin/bash
+
+sbt clean assembly

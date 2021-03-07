@@ -5,7 +5,7 @@ such as [GraphViz](http://www.graphviz.org/) to draw the hierarchy.
 
 Usage
 -----
-First, compile and package with ./build 
+First, inside this project, run the `build` executable file with command `./build`.
 
 To run Scaladiagrams do the following:
 
